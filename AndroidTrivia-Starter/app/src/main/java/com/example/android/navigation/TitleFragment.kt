@@ -24,7 +24,7 @@ class TitleFragment : Fragment() {
 
         // clickhandler for the play button
         binding.playButton.setOnClickListener { view: View ->
-            view.findNavController().navigate(R.id.action_titleFragment_to_gameFragment)
+            view.findNavController().navigate(TitleFragmentDirections.actionTitleFragmentToGameFragment())
         }
         return binding.root
     }
