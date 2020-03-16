@@ -82,7 +82,10 @@ class MainActivity : AppCompatActivity() {
             onDessertClicked()
         }
 
+        // instantiate dessertTimer using the activity's lifecycle
         dessertTimer = DessertTimer(this.lifecycle)
+
+        // restore app using saved data
         savedInstanceState?.run {
             revenue = getInt(KEY_REVENUE, 0)
             dessertsSold = getInt(KEY_DESSERT_SOLD, 0)
