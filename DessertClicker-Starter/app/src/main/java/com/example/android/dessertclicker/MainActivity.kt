@@ -90,6 +90,8 @@ class MainActivity : AppCompatActivity() {
             showCurrentDessert()
         }
 
+
+
         // Set the TextViews to the right values
         binding.revenue = revenue
         binding.amountSold = dessertsSold
