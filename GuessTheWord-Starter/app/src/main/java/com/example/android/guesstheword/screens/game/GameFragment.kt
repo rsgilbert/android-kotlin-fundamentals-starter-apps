@@ -28,6 +28,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.fragment.findNavController
 import com.example.android.guesstheword.R
 import com.example.android.guesstheword.databinding.GameFragmentBinding
 
@@ -43,53 +44,28 @@ class GameFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
 
-        // Inflate view and obtain an instance of the binding class
-        binding = DataBindingUtil.inflate(
-                inflater,
-                R.layout.game_fragment,
-                container,
-                false
-        )
+        binding = DataBindingUtil.inflate(inflater, R.layout.game_fragment,
+                container, false)
 
         // initialize viewModel
         Log.i("GameFragment", "Called ViewModelProviders.of")
         viewModel = ViewModelProviders.of(this).get(GameViewModel::class.java)
 
-        // observe score liveData.
-        // Use the fragment's view lifecycle (viewLifecycleOwner)
-        // instead of the fragment's lifecycle (this)
         viewModel.score.observe(viewLifecycleOwner, Observer { newSore ->
             binding.scoreText.text = newSore.toString()
         })
 
-        viewModel.word.observe(viewLifecycleOwner, Observer { newWord ->
-            binding.wordText.text = newWord
-        })
 
         viewModel.eventGameFinish.observe(viewLifecycleOwner, Observer { hasFinished ->
-            if(hasFinished) onEndGame()
+            if (hasFinished) onEndGame()
         })
 
-        binding.correctButton.setOnClickListener { onCorrect() }
-        binding.skipButton.setOnClickListener { onSkip() }
-        binding.endGameButton.setOnClickListener { onEndGame() }
+        binding.gameViewModel = viewModel
+        binding.lifecycleOwner = viewLifecycleOwner
         return binding.root
 
     }
 
-    /** Methods for buttons presses **/
-
-
-    /** Methods for updating the UI **/
-
-
-
-    private fun onSkip() {
-        viewModel.onSkip()
-    }
-    private fun onCorrect() {
-        viewModel.onCorrect()
-    }
 
     private fun onEndGame() {
         gameFinished()
@@ -101,7 +77,7 @@ class GameFragment : Fragment() {
     private fun gameFinished() {
         Toast.makeText(activity, "Game finished", Toast.LENGTH_LONG).show()
         val action = GameFragmentDirections.actionGameToScore(viewModel.score.value ?: 0)
-        NavHostFragment.findNavController(this).navigate(action)
+        findNavController().navigate(action)
         viewModel.onGameFinishComplete()
     }
 }
