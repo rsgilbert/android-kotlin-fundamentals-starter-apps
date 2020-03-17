@@ -66,6 +66,10 @@ class GameFragment : Fragment() {
             binding.wordText.text = newWord
         })
 
+        viewModel.eventGameFinish.observe(viewLifecycleOwner, Observer { hasFinished ->
+            if(hasFinished) onEndGame()
+        })
+
         binding.correctButton.setOnClickListener { onCorrect() }
         binding.skipButton.setOnClickListener { onSkip() }
         binding.endGameButton.setOnClickListener { onEndGame() }
@@ -98,5 +102,6 @@ class GameFragment : Fragment() {
         Toast.makeText(activity, "Game finished", Toast.LENGTH_LONG).show()
         val action = GameFragmentDirections.actionGameToScore(viewModel.score.value ?: 0)
         NavHostFragment.findNavController(this).navigate(action)
+        viewModel.onGameFinishComplete()
     }
 }
