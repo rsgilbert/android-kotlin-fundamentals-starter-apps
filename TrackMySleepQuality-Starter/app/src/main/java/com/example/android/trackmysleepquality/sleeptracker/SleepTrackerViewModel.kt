@@ -18,6 +18,7 @@ package com.example.android.trackmysleepquality.sleeptracker
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
 import com.example.android.trackmysleepquality.database.SleepDatabaseDao
@@ -43,14 +44,42 @@ class SleepTrackerViewModel(val database: SleepDatabaseDao,
 
     private var tonight = MutableLiveData<SleepNight?>()
 
+    private val _navigateToSleepQuality = MutableLiveData<SleepNight>()
+
+    val navigateToSleepQuality: LiveData<SleepNight>
+        get() = _navigateToSleepQuality
+
+    private var _showSnackbarEvent = MutableLiveData<Boolean>()
+    val showSnackbarEvent: LiveData<Boolean>
+        get() = _showSnackbarEvent
+
+    fun doneShowingSnackbar() {
+        _showSnackbarEvent.value = false
+    }
+
     init {
         initializeTonight()
     }
 
-    fun initializeTonight() {
+    private fun initializeTonight() {
         uiScope.launch {
             tonight.value = getTonightFromDatabase()
         }
+    }
+
+    fun doneNavigating() {
+        _navigateToSleepQuality.value = null
+    }
+
+    val startButtonVisible = Transformations.map(tonight) { tonight ->
+        tonight == null
+    }
+
+    val stopButtonVisible = Transformations.map(tonight) { tonight ->
+        tonight != null
+    }
+    val clearButtonVisible = Transformations.map(nights) { nights ->
+        nights?.isNotEmpty()
     }
 
     private suspend fun getTonightFromDatabase() : SleepNight? {
@@ -76,6 +105,7 @@ class SleepTrackerViewModel(val database: SleepDatabaseDao,
             val oldNight = tonight.value ?: return@launch
             oldNight.endTimeMilli = System.currentTimeMillis()
             update(oldNight)
+            _navigateToSleepQuality.value = oldNight
         }
     }
 
@@ -83,10 +113,11 @@ class SleepTrackerViewModel(val database: SleepDatabaseDao,
         uiScope.launch {
             clear()
             tonight.value = null
+            _showSnackbarEvent.value = true
         }
     }
 
-    suspend fun clear() {
+    private suspend fun clear() {
         withContext(Dispatchers.IO) {
             database.clear()
         }
